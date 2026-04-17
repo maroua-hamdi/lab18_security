@@ -1,79 +1,83 @@
-# 🔥 FireStorm CTF – Android Reverse Engineering Lab
+# 🔥 FireStorm — Android CTF Challenge Writeup
 
-![Android](https://img.shields.io/badge/Platform-Android-green)
-![Frida](https://img.shields.io/badge/Tool-Frida-blue)
-![Reverse Engineering](https://img.shields.io/badge/Domain-Reverse--Engineering-red)
+Challenge de reverse engineering Android combinant analyse statique (JADX), instrumentation dynamique (Frida) et authentification Firebase pour récupérer un flag.
 
 ---
 
-## 📌 Description
+## 📋 Étapes du challenge
 
-Ce lab consiste à analyser une application Android afin de récupérer un **flag caché**.  
-L’application repose sur plusieurs techniques :
-
-- Analyse statique avec JADX
-- Code natif (JNI)
-- Instrumentation dynamique avec Frida
-- Authentification Firebase
+1. Préparation de l'environnement
+2. Analyse statique avec JADX
+3. Script Frida – Explication détaillée
+4. Configuration Firebase extraite de strings.xml
+5. Script Python pour l'authentification et la récupération du flag
 
 ---
 
-## 🎯 Objectif
+## 🛠️ Réalisation
 
-Récupérer le **mot de passe Firebase généré dynamiquement**, puis accéder à la base de données pour obtenir le flag.
+### Étape 1 — Analyse statique avec JADX-GUI
 
----
+Ouverture du fichier `FireStorm.apk` dans JADX-GUI. On observe l'`AndroidManifest.xml` avec le package `com.pwnsec.firestorm` et les permissions réseau, ainsi que la classe `MainActivity` contenant la méthode `Password()`.
 
-# 🧪 Étape 1 : Analyse statique (JADX)
+<img width="1915" height="1030" alt="img1" src="https://github.com/user-attachments/assets/8c79a98a-a846-4ee1-a3b0-a17bb395898d" />
 
-Analyse de l’APK `FireStorm.apk` avec JADX.
-
-### 📌 Informations trouvées :
-
-- Package : `com.pwnsec.firestorm`
-- Classe principale : `MainActivity`
-- Méthode critique : `Password()`
 
 ---
 
-### 📸 AndroidManifest
+### Étape 2 — Décompilation de la méthode `Password()` dans JADX
 
-![AndroidManifest](images/manifest.png)
+La méthode `Password()` est identifiée dans `MainActivity`. Elle construit le mot de passe en concatenant plusieurs substrings extraits de `strings.xml` (R.string.Friday_Night, R.string.Author, R.string.JustRandomString, etc.), puis appelle la fonction native `generateRandomString()` de la librairie `libfirestorm.so`.
 
-📍 Emplacement :
-/images/manifest.png
+<img width="1912" height="1030" alt="img2" src="https://github.com/user-attachments/assets/e9732aeb-c3f5-4752-bdf1-45d7dd3a261f" />
 
----
-
-### 📸 Méthode Password()
-
-![Password Method](images/password_method.png)
-
-📍 Emplacement :
-/images/password_method.png
 
 ---
 
-## 🧠 Analyse de la méthode Password()
+### Étape 3 — Script Frida et exécution
 
-La méthode `Password()` :
+Création du fichier `frida_firestorm.js` et injection dans le processus de l'application via Frida. Le script appelle manuellement la méthode `Password()` sur une instance de `MainActivity` pour récupérer le mot de passe Firebase généré dynamiquement.
 
-```java
-public String Password() {
-    StringBuilder sb = new StringBuilder();
-    String string = getString(R.string.Friday_Night);
-    String string2 = getString(R.string.Author);
-    String string3 = getString(R.string.JustRandomString);
-    String string4 = getString(R.string.URL);
-    String string5 = getString(R.string.IDKMaybethepasswordpassowrd);
-    String string6 = getString(R.string.Token);
+```bash
+frida -U -p 4253 -l frida_firestorm.js
+```
 
-    sb.append(string.substring(5, 9));
-    sb.append(string4.substring(1, 6));
-    sb.append(string2.substring(2, 6));
-    sb.append(string5.substring(5, 8));
-    sb.append(string3);
-    sb.append(string6.substring(18, 26));
+Le mot de passe Firebase récupéré est affiché dans la console :
 
-    return generateRandomString(String.valueOf(sb));
-}
+```
+[+] Mot de passe Firebase généré : C7_dotpsC7t7f_._In_i.IdttpaofoaIIdIdnndIfC
+```
+
+<img width="1067" height="756" alt="img3" src="https://github.com/user-attachments/assets/8bcb7dc9-d6ee-4b59-b139-175ba84b6de9" />
+
+
+---
+
+### Étape 4 — Authentification Firebase et récupération du flag
+
+Utilisation du script Python `get_flag.py` avec le mot de passe obtenu via Frida pour s'authentifier sur Firebase avec l'email `TK757567@pwnsec.xyz`, puis lecture du flag depuis la Realtime Database.
+
+```bash
+python get_flag.py
+```
+
+<img width="1882" height="967" alt="img4" src="https://github.com/user-attachments/assets/c4a2a66e-a81c-4837-8fe6-0847e847294d" />
+
+
+---
+
+## 🏁 Flag
+
+> Le flag est récupéré depuis la base de données Firebase après authentification réussie avec le mot de passe dynamique extrait via Frida.
+
+---
+
+## 🧰 Outils utilisés
+
+| Outil | Usage |
+|-------|-------|
+| JADX-GUI | Décompilation de l'APK |
+| Frida | Instrumentation dynamique |
+| Android Emulator | Exécution de l'application |
+| Python + pyrebase | Authentification Firebase |
+| ADB | Communication avec l'émulateur |
