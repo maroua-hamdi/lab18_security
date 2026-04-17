@@ -1,10 +1,10 @@
-# 🔥 FireStorm — Android CTF Challenge Writeup
+#  FireStorm — Android CTF Challenge Writeup
 
 Challenge de reverse engineering Android combinant analyse statique (JADX), instrumentation dynamique (Frida) et authentification Firebase pour récupérer un flag.
 
 ---
 
-## 📋 Étapes du challenge
+##  Étapes du challenge
 
 1. Préparation de l'environnement
 2. Analyse statique avec JADX
@@ -14,7 +14,7 @@ Challenge de reverse engineering Android combinant analyse statique (JADX), inst
 
 ---
 
-## 🛠️ Réalisation
+##  Réalisation
 
 ### Étape 1 — Analyse statique avec JADX-GUI
 
@@ -66,13 +66,13 @@ python get_flag.py
 
 ---
 
-## 🏁 Flag
+##  Flag
 
 > Le flag est récupéré depuis la base de données Firebase après authentification réussie avec le mot de passe dynamique extrait via Frida.
 
 ---
 
-## 🧰 Outils utilisés
+##  Outils utilisés
 
 | Outil | Usage |
 |-------|-------|
